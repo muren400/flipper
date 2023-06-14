@@ -27,3 +27,6 @@ fp-info-cache
 # Exported BOM files
 *.xml
 *.csv
+
+hardware/kicad-libraries-main/*
+hardware/gerber/*
