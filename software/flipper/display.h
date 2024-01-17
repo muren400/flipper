@@ -31,6 +31,10 @@ class Display {
     }
   }
 
+  void setUpdateTime(uint32_t value) {
+    updateTimeInMillis = value;
+  }
+
   // maxY = 9
   void drawCharacter(uint8_t x, uint8_t y, char character) {
     x = 24 - x;
@@ -69,6 +73,8 @@ class Display {
  private:
   bool dirty = true;
 
+  uint32_t updateTimeInMillis = 20;
+
   uint8_t rowBuffer[4];
   uint32_t pixelBuffer[16];
   uint32_t oldPixelBuffer[16];
@@ -103,7 +109,7 @@ class Display {
     digitalWrite(B_1, LOW);
 
     setNeutral();
-    fillDisplay();
+    // fillDisplay();
     clearDisplay();
     setNeutral();
   }
@@ -259,8 +265,7 @@ class Display {
     delayMicroseconds(500);
     digitalWrite(COL_EN, LOW);
     setNeutral();
-    delay(2);
-    // delayMicroseconds(500);
+    delay(updateTimeInMillis);
   }
 };
 

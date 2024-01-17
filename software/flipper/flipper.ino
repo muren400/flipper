@@ -5,26 +5,18 @@
 #include "time.h"
 #include <WiFiManager.h>
 
-const char* ssid = "REPLACE_WITH_YOUR_SSID";
-const char* password = "REPLACE_WITH_YOUR_PASSWORD";
-
-const char* ntpServer = "pool.ntp.org";
-const long gmtOffset_sec = 0;
-const int daylightOffset_sec = 3600;
+#define MY_TZ "CET-1CEST,M3.5.0,M10.5.0/3"
+#define MY_NTP_SERVER "de.pool.ntp.org"
 
 FlipClock* flipClock;
+struct tm timeinfo;
 
 void setup() {
   Serial.begin(9600);
 
   fetchNtpTime();
 
-  time_t now;
-  time(&now);
-
   flipClock = new FlipClock(*new Display());
-  flipClock->configureOffsetFromTimestamp(((uint64_t)now)*1000, 2);
-  // flipClock->configureOffsetFromHourAndMinute(timeinfo.H, timeinfo.M, 2);
 }
 
 void fetchNtpTime() {
@@ -39,7 +31,9 @@ void fetchNtpTime() {
   } else {
     Serial.println("connected...yeey :)");
 
-    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+    configTime(0, 0, MY_NTP_SERVER);
+    setenv("TZ", MY_TZ, 1);
+    tzset();
     printLocalTime();
   }
 
@@ -48,7 +42,6 @@ void fetchNtpTime() {
 }
 
 void printLocalTime() {
-  struct tm timeinfo;
   if (!getLocalTime(&timeinfo)) {
     Serial.println("Failed to obtain time");
     return;
@@ -82,9 +75,12 @@ void printLocalTime() {
 }
 
 void loop() {
-  flipClock->tick(millis());
-  // digitalWrite(COL_EN, LOW);
-  // delay(100);
-  // digitalWrite(COL_EN, HIGH);
-  delay(100);
+  delay(1000);
+
+  if (!getLocalTime(&timeinfo)) {
+    Serial.println("Failed to obtain time");
+    return;
+  }
+
+  flipClock->drawTime(timeinfo.tm_hour, timeinfo.tm_min);
 }
